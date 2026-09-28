@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GENERATOR ASN & PART CONTENT</title>
+  <link rel="shortcut icon" href="logoo.ico" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #f1f5f9; color: #0f172a; margin: 0; padding: 20px; font-family: Calibri, 'Segoe UI', sans-serif; }
+    .container { max-width: 1280px; margin: 0 auto; background: #fff; padding: 22px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    h1 { margin-top: 0; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .field input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; align-items: center; }
+    button { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; }
+    button:hover { background: #1d4ed8; }
+    button.print-btn { background: #eab308; color: #000; }
+    button.print-btn:hover { background: #ca8a04; }
+    button.success { background: #16a34a; }
+    button.success:hover { background: #15803d; }
+    table.cfg-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+    table.cfg-table th, table.cfg-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center; }
+    table.cfg-table th { background: #1e293b; color: #fff; }
+    input.split-input { width: 100%; padding: 4px 6px; border: 1px solid #94a3b8; border-radius: 4px; font-family: monospace; font-size: 12px; }
+    .summary-bar { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; padding: 10px 14px; border-radius: 6px; font-weight: 700; margin-bottom: 14px; display: none; }
+
+    /* Styling Persis Tampilan Excel PART CONTENT */
+    .part-content-wrapper { margin-top: 20px; }
+    .pc-card { margin-bottom: 28px; page-break-inside: avoid; break-inside: avoid; }
+    table.pc-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    table.pc-table td, table.pc-table th { font-family: Calibri, sans-serif; text-align: center; vertical-align: middle; padding: 4px 6px; }
+    .col-rak { width: 45px; border: none !important; font-size: 16px; }
+    .col-pal { width: 45px; border: none !important; font-size: 16px; }
+    .pc-title { font-family: 'Times New Roman', Times, serif !important; font-size: 26px; letter-spacing: 1px; border: 1px solid #000; padding: 6px 0 !important; background: #fff; }
+    .pc-spacer { height: 14px; border: none !important; }
+    .pc-hdr-ylw { background: #ffff00 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 700; font-size: 14px; border: 1px solid #000; height: 52px; }
+    .pc-hdr-wht { background: #ffffff !important; font-weight: 400; font-size: 14px; border: 1px solid #000; height: 52px; }
+    .pc-row td.bordered { border: 1px solid #000; font-size: 16px; height: 28px; padding: 4px 10px; white-space: nowrap; }
+    .pc-row td.rak-box { border: 1px solid #000; font-size: 17px; }
+    .dashboard-footer {text-align: center;padding: 3rem 1.5rem;font-size: 0.875rem;color: #64748b;margin-top: auto;}
+    .dashboard-footer-container {max-width: 1024px;margin-left: auto;margin-right: auto;border-top: 1px solid #1e293b;padding-top: 2rem;}
+    .dashboard-footer-text {margin-bottom: 1rem;font-weight: 600;color: #010f23;}
+
+    @media print {
+    @page { size: landscape; margin: 0; }
+    body { background: #fff; padding: 10mm 8mm; margin: 0; }
+    .no-print { display: none !important; }
+    .container { box-shadow: none; padding: 0; max-width: 100%; }
+    .pc-card { margin-bottom: 20px; }
+  }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="no-print">
+    <h1>Generator Otomatis PO Kanban &rarr; ASN Template & Cetak PART CONTENT</h1>
+
+    <div class="grid">
+      <div class="field">
+        <label>1. Upload File PO_KANBAN (.xlsx)</label>
+        <input type="file" id="poFile" accept=".xlsx,.xls">
+      </div>
+      <div class="field">
+        <label>Case No B1 (Satu Tempat / Rak 1)</label>
+        <input type="text" id="caseB1" value="BSMC0E24" oninput="syncCaseNames()">
+      </div>
+      <div class="field">
+        <label>Case No D1 Reguler (Mark 2)</label>
+        <input type="text" id="caseD1" value="DSMC0E25" oninput="syncCaseNames()">
+      </div>
+      <div class="field">
+        <label>Case No D1 Additional (Mark 3)</label>
+        <input type="text" id="caseD1Big" value="DSMC0E26" oninput="syncCaseNames()">
+      </div>
+    </div>
+
+    <div id="summaryBar" class="summary-bar"></div>
+
+    <div id="configSection" style="display:none;">
+      <table class="cfg-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Pallet</th>
+            <th>Case Mark</th>
+            <th>Case No</th>
+            <th>Vendor</th>
+            <th>PO No</th>
+            <th>Item No</th>
+            <th>Part No</th>
+            <th>Order Qty</th>
+            <th>Pengaturan Rak</th>
+            <th style="width:250px;">Pecahan Qty per Rak</th>
+          </tr>
+        </thead>
+        <tbody id="poTableBody"></tbody>
+      </table>
+
+      <div class="actions">
+        <button class="print-btn" onclick="window.print()">🖨️ Print Semua PART CONTENT</button>
+        <button class="success" onclick="downloadASNExcel()">📥 Download Excel Lengkap (ASN + PART CONTENT)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Area Cetak PART CONTENT Persis Foto -->
+  <div id="partContentArea" class="part-content-wrapper"></div>
+</div>
+<footer class="dashboard-footer">
+    <div class="dashboard-footer-container">
+        <p class="dashboard-footer-text">
+            &copy; <span id="tahun-sekarang">{{ date('Y') }}</span> PPIC SOMIC. All Rights Reserved.
+        </p>
+    </div>
+</footer>
+
+<script>
+    // Otomatis update tahun jika halaman tidak di-refresh
+    document.getElementById('tahun-sekarang').textContent = new Date().getFullYear();
+</script>
+
+<script>
+let cleanedPO = [];
+let generatedASN = [];
+let groupedByRak = [];
+
+function getSmartSplit(partNo, orderQty, pallet) {
+  if (pallet === 'B1') return [orderQty];
+  const p = String(partNo).trim();
+  if ((p === '450460K060' || p === '450460K070') && orderQty <= 20) return [orderQty];
+  if (p === '48820BZ060' && orderQty === 15) return [7, 8];
+  if (p === '48820BZ080' && orderQty === 21) return [10, 11];
+  if (p === '48820BZ130' && orderQty === 13) return [6, 7];
+
+  const splits = [];
+  let rem = orderQty;
+  while (rem > 0) {
+    const take = Math.min(rem, 10);
+    splits.push(take);
+    rem -= take;
+  }
+  return splits;
+}
+
+document.getElementById('poFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+    const validRows = rows.filter(r => {
+      const no = String(r['NO.'] || '').trim();
+      return /^\d+$/.test(no) && r['P/O NUMBER'] && r['PARTS NO.'];
+    });
+
+    validRows.sort((a, b) => {
+      const palA = String(a['PALLETIZE MARK']).trim();
+      const palB = String(b['PALLETIZE MARK']).trim();
+      if (palA !== palB) return palA.localeCompare(palB);
+      return 0;
+    });
+
+    const caseB1 = document.getElementById('caseB1').value.trim();
+    const caseD1 = document.getElementById('caseD1').value.trim();
+    const caseD1Big = document.getElementById('caseD1Big').value.trim();
+
+    cleanedPO = validRows.map(r => {
+      const pallet = String(r['PALLETIZE MARK']).trim();
+      const orderQty = parseInt(r['ORDER QTY']) || 0;
+      const poNo = String(r['P/O NUMBER']).trim();
+
+      let caseMark = '2';
+      let caseNo = caseD1;
+      if (pallet === 'B1') {
+        caseMark = '1';
+        caseNo = caseB1;
+      } else if (orderQty >= 100 || !poNo.startsWith('SM')) {
+        caseMark = '3';
+        caseNo = caseD1Big;
+      }
+
+      return {
+        vendor: String(r['VENDOR CODE']).trim(),
+        poNo: poNo,
+        itemNo: String(r['ITEM NO']).trim().padStart(4, '0'),
+        partNo: String(r['PARTS NO.']).trim(),
+        orderQty: orderQty,
+        pallet: pallet,
+        shipDate: String(r['DELIVERY SCHEDULE DATE']).trim(),
+        caseMark: caseMark,
+        caseNo: caseNo,
+        splits: getSmartSplit(r['PARTS NO.'], orderQty, pallet)
+      };
+    });
+
+    renderPOTable();
+    buildAllData();
+    document.getElementById('configSection').style.display = 'block';
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function syncCaseNames() {
+  if (cleanedPO.length === 0) return;
+  const caseB1 = document.getElementById('caseB1').value.trim();
+  const caseD1 = document.getElementById('caseD1').value.trim();
+  const caseD1Big = document.getElementById('caseD1Big').value.trim();
+
+  cleanedPO.forEach(item => {
+    if (item.pallet === 'B1') item.caseNo = caseB1;
+    else if (item.caseMark === '3') item.caseNo = caseD1Big;
+    else item.caseNo = caseD1;
+  });
+  renderPOTable();
+  buildAllData();
+}
+
+function renderPOTable() {
+  const tbody = document.getElementById('poTableBody');
+  tbody.innerHTML = '';
+  cleanedPO.forEach((item, idx) => {
+    const isB1 = item.pallet === 'B1';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td><b>${item.pallet}</b></td>
+      <td>${item.caseMark}</td>
+      <td><b>${item.caseNo}</b></td>
+      <td>${item.vendor}</td>
+      <td>${item.poNo}</td>
+      <td>${item.itemNo}</td>
+      <td><b>${item.partNo}</b></td>
+      <td><b>${item.orderQty}</b></td>
+      <td>${isB1 ? '🔒 Gabung 1 Tabel PART CONTENT (Rak 1)' : '1 Rak = 1 Tabel PART CONTENT'}</td>
+      <td>
+        <input type="text" class="split-input" value="${item.splits.join(', ')}" 
+          ${isB1 ? 'readonly style="background:#fef9c3;font-weight:bold;"' : ''} 
+          onchange="updateSplit(${idx}, this.value)">
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateSplit(idx, val) {
+  const nums = val.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+  if (nums.length > 0) {
+    cleanedPO[idx].splits = nums;
+    buildAllData();
+  }
+}
+
+function buildAllData() {
+  generatedASN = [];
+  const rakMap = new Map();
+  const hasB1 = cleanedPO.some(i => i.pallet === 'B1');
+  let currentD1Rak = hasB1 ? 1 : 0;
+
+  cleanedPO.forEach(item => {
+    if (item.pallet === 'B1') {
+      item.splits.forEach(qty => {
+        const rowObj = {
+          NO_RAK: "1",
+          SHIPMENT_DATE: item.shipDate,
+          CASE_NO: item.caseNo,
+          CASE_PALLETIZE_MARK: "1",
+          PO_NO: item.poNo,
+          PO_DATE: "",
+          ITEM_NO: item.itemNo,
+          FRANCHISE: "",
+          PART_NO: item.partNo,
+          DELIVERY_QUANTITY: qty,
+          VENDOR_CODE: item.vendor,
+          PALLET: item.pallet
+        };
+        generatedASN.push(rowObj);
+        if (!rakMap.has("1")) rakMap.set("1", []);
+        rakMap.get("1").push(rowObj);
+      });
+    } else {
+      item.splits.forEach(qty => {
+        currentD1Rak++;
+        const rakStr = String(currentD1Rak);
+        const rowObj = {
+          NO_RAK: rakStr,
+          SHIPMENT_DATE: item.shipDate,
+          CASE_NO: item.caseNo,
+          CASE_PALLETIZE_MARK: String(item.caseMark),
+          PO_NO: item.poNo,
+          PO_DATE: "",
+          ITEM_NO: item.itemNo,
+          FRANCHISE: "",
+          PART_NO: item.partNo,
+          DELIVERY_QUANTITY: qty,
+          VENDOR_CODE: item.vendor,
+          PALLET: item.pallet
+        };
+        generatedASN.push(rowObj);
+        rakMap.set(rakStr, [rowObj]);
+      });
+    }
+  });
+
+  groupedByRak = Array.from(rakMap.entries());
+  renderPartContentSlips();
+
+  const totalQty = generatedASN.reduce((acc, r) => acc + r.DELIVERY_QUANTITY, 0);
+  const sumBar = document.getElementById('summaryBar');
+  sumBar.style.display = 'block';
+  sumBar.innerText = `✅ Total Baris ASN: ${generatedASN.length} Baris | Total Label PART CONTENT Siap Print: ${groupedByRak.length} Tabel (Rak 1 Gabung Satu Tempat, Rak 2 s/d ${currentD1Rak} Sendiri-Sendiri) | Total Qty: ${totalQty} Pcs`;
+}
+
+function renderPartContentSlips() {
+  const container = document.getElementById('partContentArea');
+  container.innerHTML = '';
+
+  // Urutkan tampilan seperti di contoh: Rak D1, lalu Rak 1 (B1 Satu Tempat) juga tampil jelas
+  groupedByRak.forEach(([rakNo, rows]) => {
+    const isMultiRow = rows.length > 1 || rows[0].PALLET === 'B1';
+    let rowsHtml = '';
+
+    // Jika B1 (Satu Tempat), tambahkan 1 baris kosong ber-border di atasnya persis seperti baris 78 di foto
+    if (isMultiRow) {
+      rowsHtml += `
+        <tr class="pc-row">
+          <td class="rak-box"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+          <td class="bordered"></td>
+        </tr>
+      `;
+    }
+
+    rows.forEach(r => {
+      rowsHtml += `
+        <tr class="pc-row">
+          <td class="${isMultiRow ? 'rak-box' : 'col-rak'}">${r.NO_RAK}</td>
+          <td class="bordered">${r.SHIPMENT_DATE}</td>
+          <td class="bordered" style="text-align:left;">${r.CASE_NO}</td>
+          <td class="bordered" style="text-align:left;">${r.CASE_PALLETIZE_MARK}</td>
+          <td class="bordered" style="text-align:left;">${r.PO_NO}</td>
+          <td class="bordered">${r.PO_DATE}</td>
+          <td class="bordered" style="text-align:left;">${r.ITEM_NO}</td>
+          <td class="bordered">${r.FRANCHISE}</td>
+          <td class="bordered" style="text-align:left;">${r.PART_NO}</td>
+          <td class="bordered" style="text-align:right;">${r.DELIVERY_QUANTITY}</td>
+          <td class="bordered" style="text-align:left;">${r.VENDOR_CODE}</td>
+          <td class="${isMultiRow ? 'bordered' : 'col-pal'}" style="text-align:left;">${r.PALLET}</td>
+        </tr>
+      `;
+    });
+
+    const card = document.createElement('div');
+    card.className = 'pc-card';
+    card.innerHTML = `
+      <table class="pc-table">
+        <tr>
+          <td class="col-rak"></td>
+          <td colspan="10" class="pc-title">PART CONTENT</td>
+          <td class="col-pal"></td>
+        </tr>
+        <tr><td colspan="12" class="pc-spacer"></td></tr>
+        <tr>
+          <td class="col-rak"></td>
+          <td class="pc-hdr-ylw">SHIPMENT<br>DATE</td>
+          <td class="pc-hdr-ylw">CASE NO</td>
+          <td class="pc-hdr-wht">CASE<br>PALLETIZE<br>MARK</td>
+          <td class="pc-hdr-ylw">PO NO</td>
+          <td class="pc-hdr-wht">PO DATE</td>
+          <td class="pc-hdr-ylw">ITEM NO</td>
+          <td class="pc-hdr-wht">FRANCHISE</td>
+          <td class="pc-hdr-ylw">PART NO</td>
+          <td class="pc-hdr-ylw">DELIVERY<br>QUANTITY</td>
+          <td class="pc-hdr-ylw">VENDOR<br>CODE</td>
+          <td class="col-pal"></td>
+        </tr>
+        ${rowsHtml}
+      </table>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function downloadASNExcel() {
+  if (generatedASN.length === 0) return;
+
+  const wsData = [];
+  const merges = [];
+
+  // 1. Header Tabel Utama ASN (Baris 1)
+  wsData.push([
+    "DELIVERY DATE", "NO RAK", "SHIPMENT DATE", "CASE NO", "CASE PALLETIZE MARK",
+    "PO NO", "PO DATE", "ITEM NO", "FRANCHISE", "PART NO", "DELIVERY QUANTITY",
+    "VENDOR CODE", "", "PREPARE", "ADMIN"
+  ]);
+
+  // 2. Isi Tabel Utama ASN (Baris 2 s/d 55)
+  generatedASN.forEach(r => {
+    wsData.push([
+      "", r.NO_RAK, r.SHIPMENT_DATE, r.CASE_NO, r.CASE_PALLETIZE_MARK,
+      r.PO_NO, "", r.ITEM_NO, "", r.PART_NO, r.DELIVERY_QUANTITY,
+      r.VENDOR_CODE, r.PALLET, "", ""
+    ]);
+  });
+
+  // 3. Tambahkan Seluruh Blok PART CONTENT di Bawahnya Persis Contoh File Excel
+  groupedByRak.forEach(([rakNo, rows]) => {
+    wsData.push([]); // Baris kosong pemisah
+    const titleRowIdx = wsData.length;
+    wsData.push(["", "", "PART CONTENT", "", "", "", "", "", "", "", "", "", ""]);
+    merges.push({ s: { r: titleRowIdx, c: 2 }, e: { r: titleRowIdx, c: 11 } });
+
+    wsData.push([]); // Baris spasi bawah judul
+    wsData.push([
+      "", "", "SHIPMENT DATE", "CASE NO", "CASE PALLETIZE MARK",
+      "PO NO", "PO DATE", "ITEM NO", "FRANCHISE", "PART NO",
+      "DELIVERY QUANTITY", "VENDOR CODE", ""
+    ]);
+
+    if (rows.length > 1 || rows[0].PALLET === 'B1') {
+      wsData.push(["", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    }
+
+    rows.forEach(r => {
+      wsData.push([
+        "", r.NO_RAK, r.SHIPMENT_DATE, r.CASE_NO, r.CASE_PALLETIZE_MARK,
+        r.PO_NO, "", r.ITEM_NO, "", r.PART_NO, r.DELIVERY_QUANTITY,
+        r.VENDOR_CODE, r.PALLET
+      ]);
+    });
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!merges'] = merges;
+  ws['!cols'] = [
+    { wch: 13 }, { wch: 7 }, { wch: 15 }, { wch: 16 }, { wch: 18 },
+    { wch: 15 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 17 },
+    { wch: 19 }, { wch: 14 }, { wch: 7 }, { wch: 10 }, { wch: 10 }
+  ];
+
+  // Beri warna kuning & border otomatis pada sel Excel
+  const borderAll = {
+    top: { style: "thin", color: { rgb: "000000" } },
+    bottom: { style: "thin", color: { rgb: "000000" } },
+    left: { style: "thin", color: { rgb: "000000" } },
+    right: { style: "thin", color: { rgb: "000000" } }
+  };
+  const yellowCols = [2, 3, 5, 7, 9, 10, 11];
+
+  for (let R = 0; R < wsData.length; R++) {
+    const row = wsData[R];
+    if (!row || row.length === 0) continue;
+
+    // Styling baris PART CONTENT
+    if (row[2] === "PART CONTENT") {
+      for (let C = 2; C <= 11; C++) {
+        const ref = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[ref]) ws[ref] = { t: 's', v: '' };
+        ws[ref].s = {
+          font: { name: "Times New Roman", sz: 22 },
+          alignment: { horizontal: "center", vertical: "center" },
+          border: borderAll
+        };
+      }
+    }
+    // Styling baris Header SHIPMENT DATE
+    else if (row[2] === "SHIPMENT DATE") {
+      for (let C = 2; C <= 11; C++) {
+        const ref = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[ref]) continue;
+        const isYlw = yellowCols.includes(C);
+        ws[ref].s = {
+          font: { name: "Calibri", sz: 13, bold: isYlw },
+          fill: isYlw ? { fgColor: { rgb: "FFFF00" } } : undefined,
+          alignment: { horizontal: "center", vertical: "center", wrapText: true },
+          border: borderAll
+        };
+      }
+    }
+    // Styling baris Data di bawah PART CONTENT
+    else if (R > generatedASN.length + 1 && (row[2] || row[1] === "")) {
+      for (let C = 1; C <= 12; C++) {
+        const ref = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!ws[ref]) ws[ref] = { t: 's', v: '' };
+        ws[ref].s = {
+          font: { name: "Calibri", sz: 15 },
+          alignment: { horizontal: "center", vertical: "center" },
+          border: (C >= 2 && C <= 11) || row[12] === 'B1' ? borderAll : undefined
+        };
+      }
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "ASN TEMPLATE");
+  const shipDate = generatedASN[0]?.SHIPMENT_DATE || "EXPORT";
+  XLSX.writeFile(wb, `ASN_Template_${shipDate}_SIAP_PRINT.xlsx`);
+}
+</script>
+</body>
+</html>
