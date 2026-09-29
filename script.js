@@ -373,15 +373,13 @@ function downloadASNExcel() {
   for (let R = 0; R < wsData.length; R++) {
     const row = wsData[R];
     if (!row || row.length === 0) continue; 
-
-    // A. BIKIN GARIS UNTUK TABEL UTAMA ASN (ATAS)
     if (R <= generatedASN.length) {
       for (let C = 0; C < 15; C++) {
         const ref = XLSX.utils.encode_cell({ r: R, c: C });
         if (!ws[ref]) ws[ref] = { t: 's', v: '' };
         
         ws[ref].s = {
-          font: { name: "Calibri", sz: R === 0 ? 12 : 13, bold: R === 0 },
+          font: { name: "Calibri", sz: R === 0 ? 12 : 14, bold: R === 0 },
           alignment: { horizontal: "center", vertical: "center", wrapText: true },
           border: borderAll 
         };
@@ -396,7 +394,7 @@ function downloadASNExcel() {
           const ref = XLSX.utils.encode_cell({ r: R, c: C });
           if (!ws[ref]) ws[ref] = { t: 's', v: '' };
           ws[ref].s = {
-            font: { name: "Times New Roman", sz: 22 },
+            font: { name: "Times New Roman", sz: 24 },
             alignment: { horizontal: "center", vertical: "center" },
             border: borderAll
           };
@@ -420,7 +418,7 @@ function downloadASNExcel() {
           const ref = XLSX.utils.encode_cell({ r: R, c: C });
           if (!ws[ref]) ws[ref] = { t: 's', v: '' };
           ws[ref].s = {
-            font: { name: "Calibri", sz: 14 },
+            font: { name: "Calibri", sz: 18 },
             alignment: { horizontal: "center", vertical: "center" },
             border: (C >= 2 && C <= 11) || row[12] === 'B1' || (C === 1 && row[1]) ? borderAll : undefined
           };
