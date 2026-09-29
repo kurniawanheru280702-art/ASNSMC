@@ -1,0 +1,83 @@
+* { box-sizing: border-box; }
+    body { background: #f1f5f9; color: #0f172a; margin: 0; padding: 100px 20px 20px 20px; font-family: Calibri, 'Segoe UI', sans-serif; }
+    .container { max-width: 1280px; margin: 0 auto; background: #fff; padding: 22px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    h1 { margin-top: 0; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 14px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .field input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; align-items: center; }
+    button { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; }
+    button:hover { background: #1d4ed8; }
+    button.print-btn { background: #eab308; color: #000; }
+    button.print-btn:hover { background: #ca8a04; }
+    button.success { background: #16a34a; }
+    button.success:hover { background: #15803d; }
+    table.cfg-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+    table.cfg-table th, table.cfg-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center; }
+    table.cfg-table th { background: #1e293b; color: #fff; }
+    input.split-input { width: 100%; padding: 4px 6px; border: 1px solid #94a3b8; border-radius: 4px; font-family: monospace; font-size: 12px; }
+    .summary-bar { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; padding: 10px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 14px; display: none; }
+    .error-msg {color: #dc2626;font-size: 11px;font-weight: bold;margin-top: 4px;display: none;}
+    /* ================= NAVBAR STYLING (FIXED KEREN) ================= */
+    .navbar {
+      /* Bikin background warna gelapnya punya gradasi (fade) */
+      background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
+      padding: 14px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+      border-bottom: 3px solid #38bdf8; /* Aksen garis biru menyala di bawah */
+      
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      text-align: left;
+    }
+
+    .navbar-brand {
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Bayangan teks biar elegan */
+    }
+
+    .navbar-brand .nav-icon-img {
+      height: 32px; /* Atur angka ini kalau logonya kekecilan/kebesaran */
+      width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); /* Biar logonya tetap punya bayangan keren */
+    }
+
+    .navbar-brand .highlight {
+      color: #38bdf8; /* Warna biru terang/cyan khusus kata SOMIC */
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.5); /* Efek tulisan SOMIC menyala / glowing */
+    }
+
+    /* Styling Persis Tampilan Excel PART CONTENT */
+    .part-content-wrapper { margin-top: 20px; }
+    .pc-card { margin-bottom: 28px; page-break-inside: avoid; break-inside: avoid; }
+    table.pc-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    table.pc-table td, table.pc-table th { font-family: Calibri, sans-serif; text-align: center; vertical-align: middle; padding: 4px 6px; }
+    .col-rak { width: 45px; border: none !important; font-size: 16px; }
+    .col-pal { width: 45px; border: none !important; font-size: 16px; }
+    .pc-title { font-family: 'Times New Roman', Times, serif !important; font-size: 26px; letter-spacing: 1px; border: 1px solid #000; padding: 6px 0 !important; background: #fff; }
+    .pc-spacer { height: 14px; border: none !important; }
+    .pc-hdr-ylw { background: #ffff00 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 700; font-size: 14px; border: 1px solid #000; height: 52px; }
+    .pc-hdr-wht { background: #ffffff !important; font-weight: 400; font-size: 14px; border: 1px solid #000; height: 52px; }
+    .pc-row td.bordered { border: 1px solid #000; font-size: 16px; height: 28px; padding: 4px 10px; white-space: nowrap; }
+    .pc-row td.rak-box { border: 1px solid #000; font-size: 17px; }
+    .dashboard-footer {text-align: center;padding: 3rem 1.5rem;font-size: 0.875rem;color: #64748b;margin-top: auto;}
+    .dashboard-footer-container {max-width: 1024px;margin-left: auto;margin-right: auto;border-top: 1px solid #1e293b;padding-top: 2rem;}
+    .dashboard-footer-text {margin-bottom: 1rem;font-weight: 600;color: #010f23;}
+
+    @media print {
+    @page { size: landscape; margin: 0; }
+    body { background: #fff; padding: 10mm 8mm; margin: 0; }
+    .no-print { display: none !important; }
+    .container { box-shadow: none; padding: 0; max-width: 100%; }
+    .pc-card { margin-bottom: 20px; }
+  }

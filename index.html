@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GENERATOR ASN & PART CONTENT</title>
+  <link rel="shortcut icon" href="logoo.ico" type="image/x-icon">
+  <script src="xlsx.bundle.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar no-print">
+    <div class="navbar-brand">
+      <img src="logoo.ico" class="nav-icon-img" alt="Logo SOMIC">
+      PPIC <span class="highlight">SOMIC</span>
+    </div>
+  </nav>
+<div class="container">
+  <div class="no-print">
+    <h1>Generator Otomatis PO Kanban &rarr; ASN Template & Cetak PART CONTENT</h1>
+    <div class="grid">
+      <div class="field">
+        <label>1. Upload File PO_KANBAN</label>
+        <input type="file" id="poFile" accept=".xlsx,.xls">
+      </div>
+        <div class="field">
+        <label>Case No B1 (Mark 1)</label>
+        <input type="text" id="caseB1" placeholder="BSMC0E24" oninput="runValidation()">
+        <span id="errB1" class="error-msg" style="display:none; color:red; font-size:11px; font-weight:bold;">❌ Case B1 harus diawali huruf B!</span>
+        </div>
+        <div class="field">
+        <label>Case No D1 Reguler (Mark 2)</label>
+        <input type="text" id="caseD1" placeholder="DSMC0E25" oninput="runValidation()">
+        <span id="errD1" class="error-msg" style="display:none; color:red; font-size:11px; font-weight:bold;">❌ Case D2 harus diawali huruf D!</span>
+        </div>
+        <div class="field">
+        <label>Case No D1 Additional (Mark 3)</label>
+        <input type="text" id="caseD1Big" placeholder="DSMC0E26" oninput="runValidation()">
+        <span id="errD1Big" class="error-msg" style="display:none; color:red; font-size:11px; font-weight:bold;">❌ Case D3 harus diawali huruf D!</span>
+        </div>
+    </div>
+    <div id="summaryBar" class="summary-bar"></div>
+    <div id="configSection" style="display:none;">
+      <table class="cfg-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Pallet</th>
+            <th>Case Mark</th>
+            <th>Case No</th>
+            <th>Vendor</th>
+            <th>PO No</th>
+            <th>Item No</th>
+            <th>Part No</th>
+            <th>Order Qty</th>
+            <th>Pengaturan Rak</th>
+            <th style="width:250px;">Pecahan Qty per Rak</th>
+          </tr>
+        </thead>
+        <tbody id="poTableBody"></tbody>
+      </table>
+      <div class="actions">
+        <button id="btnPrint" class="print-btn" onclick="window.print()">🖨️ Print Semua PART CONTENT</button>
+        <button id="btnDownload" class="success" onclick="downloadASNExcel()">📥 Download (ASN + PART CONTENT)</button>
+      </div>
+    </div>
+  </div>
+  <div id="partContentArea" class="part-content-wrapper"></div>
+</div>
+<footer class="dashboard-footer">
+    <div class="dashboard-footer-container">
+        <p class="dashboard-footer-text">
+            &copy; <span id="tahun-sekarang">{{ date('Y') }}</span> PPIC SOMIC. All Rights Reserved.
+        </p>
+    </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
