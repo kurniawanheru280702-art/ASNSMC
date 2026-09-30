@@ -6,16 +6,23 @@ let groupedByRak = [];
 function getSmartSplit(partNo, orderQty, pallet) {
   if (pallet === 'B1') return [orderQty];
   const p = String(partNo).trim();
-  if ((p === '450460K060' || p === '450460K070') && orderQty <= 20) return [orderQty];
   if (p === '48820BZ060' && orderQty === 15) return [7, 8];
   if (p === '48820BZ080' && orderQty === 21) return [10, 11];
   if (p === '48820BZ130' && orderQty === 13) return [6, 7];
   if (p === '488200D040' && orderQty === 13) return [8, 5];
 
+  let maxPerRak = 10;
+
+  if (p === '488200D040') {
+    maxPerRak = 8;
+    } else if (p === '450460K060' || p === '450460K070') {
+    maxPerRak = 20; 
+  }
+   if (p === 'PARTLAIN01') { maxPerRak = 5; }
   const splits = [];
   let rem = orderQty;
   while (rem > 0) {
-    const take = Math.min(rem, 10);
+    const take = Math.min(rem, maxPerRak);
     splits.push(take);
     rem -= take;
   }
