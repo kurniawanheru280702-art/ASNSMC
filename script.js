@@ -15,7 +15,7 @@ function getSmartSplit(partNo, orderQty, pallet) {
     } else if (p === '450460K060' || p === '450460K070') {
     maxPerRak = 20; 
   }
-   //if (p === 'PARTLAIN') { maxPerRak = 5; }
+   if (p === '48820BZ070') { maxPerRak = 15; }
   const splits = [];
   let rem = orderQty;
   while (rem > 0) {
