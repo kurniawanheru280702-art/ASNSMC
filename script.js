@@ -7,14 +7,14 @@ function getSmartSplit(partNo, orderQty, pallet) {
   if (pallet === 'B1') return [orderQty];
   const p = String(partNo).trim();
   if (p === '48820BZ060' && orderQty === 15) return [7, 8];
-  if (p === '48820BZ080' && orderQty === 21) return [10, 11];
+  if (p === '48820BZ070' && orderQty === 21) return [10, 11];
   if (p === '48820BZ130' && orderQty === 13) return [6, 7];
   let maxPerRak = 10;
   if (p === '488200D040') {
     maxPerRak = 8;
   } else if (p === '450460K060' || p === '450460K070') {
     maxPerRak = 20; 
-  }else if (p === '48820BZ070') {
+  }else if (p === '48820BZ080') {
     maxPerRak = 15; 
   }
   const splits = [];
