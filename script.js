@@ -4,7 +4,7 @@ let generatedASN = [];
 let groupedByRak = [];
 
 function getSmartSplit(partNo, orderQty, pallet) {
-  if (pallet === 'B1') return [orderQty];
+  if (pallet === 'B1'|| pallet === 'C1') return [orderQty];
   const p = String(partNo).trim();
   if (p === '48820BZ060' && orderQty === 15) return [7, 8];
   if (p === '48820BZ070' && orderQty === 21) return [10, 11];
