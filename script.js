@@ -50,22 +50,31 @@ document.getElementById('poFile').addEventListener('change', function(e) {
     });
 
     const caseB1 = document.getElementById('caseB1').value.trim();
+    const caseC1 = document.getElementById('caseC1').value.trim();
     const caseD1 = document.getElementById('caseD1').value.trim();
     const caseD1Big = document.getElementById('caseD1Big').value.trim();
+
+    const hasC1 = validRows.some(r => String(r['PALLETIZE MARK']).trim() === 'C1');    
 
     cleanedPO = validRows.map(r => {
       const pallet = String(r['PALLETIZE MARK']).trim();
       const orderQty = parseInt(r['ORDER QTY']) || 0;
       const poNo = String(r['P/O NUMBER']).trim();
 
-      let caseMark = '2';
-      let caseNo = caseD1;
+      let caseMark = '';
+      let caseNo = '';
       if (pallet === 'B1') {
         caseMark = '1';
         caseNo = caseB1;
+      } else if (pallet === 'C1') {
+        caseMark = '2';
+        caseNo = caseC1;
       } else if (orderQty >= 100 || !poNo.startsWith('SM')) {
-        caseMark = '3';
+        caseMark = hasC1 ? '4' : '3';
         caseNo = caseD1Big;
+      } else {
+        caseMark = hasC1 ? '3' : '2';
+        caseNo = caseD1;
       }
 
       return {
@@ -88,15 +97,16 @@ document.getElementById('poFile').addEventListener('change', function(e) {
   };
   reader.readAsArrayBuffer(file);
 });
-
 function runValidation() {
   if (cleanedPO.length === 0) return;
 
   const caseB1 = (document.getElementById('caseB1')?.value || '').trim().toUpperCase();
+  const caseC1 = (document.getElementById('caseC1')?.value || '').trim().toUpperCase(); // 👈 Ambil nilai C1
   const caseD1 = (document.getElementById('caseD1')?.value || '').trim().toUpperCase();
   const caseD1Big = (document.getElementById('caseD1Big')?.value || '').trim().toUpperCase();
 
   const errB1 = document.getElementById('errB1');
+  const errC1 = document.getElementById('errC1');
   const errD1 = document.getElementById('errD1');
   const errD1Big = document.getElementById('errD1Big');
 
@@ -107,22 +117,46 @@ function runValidation() {
   } else {
     if (errB1) errB1.style.display = 'none';
   }
+
+  // Cek C1
+  if (caseC1 && !caseC1.startsWith('C')) {
+    if (errC1) errC1.style.display = 'block';
+    isAllValid = false;
+  } else {
+    if (errC1) errC1.style.display = 'none';
+  }
+
+  // Cek D1 Reguler
   if (caseD1 && !caseD1.startsWith('D')) {
     if (errD1) errD1.style.display = 'block';
     isAllValid = false;
   } else {
     if (errD1) errD1.style.display = 'none';
   }
+
+  // Cek D1 Additional
   if (caseD1Big && !caseD1Big.startsWith('D')) {
     if (errD1Big) errD1Big.style.display = 'block';
     isAllValid = false;
   } else {
     if (errD1Big) errD1Big.style.display = 'none';
   }
+  
+  if (caseB1 && !caseB1.startsWith('B')) isAllValid = false;
+  if (caseC1 && !caseC1.startsWith('C')) isAllValid = false; 
+  if (caseD1 && !caseD1.startsWith('D')) isAllValid = false;
+  if (caseD1Big && !caseD1Big.startsWith('D')) isAllValid = false;
+
   cleanedPO.forEach(item => {
-    if (item.pallet === 'B1') item.caseNo = caseB1;
-    else if (item.caseMark === '3') item.caseNo = caseD1Big;
-    else item.caseNo = caseD1;
+    if (item.pallet === 'B1') {
+      item.caseNo = caseB1;
+    } else if (item.pallet === 'C1') {
+      item.caseNo = caseC1;
+    } else if (item.orderQty >= 100 || !item.poNo.startsWith('SM')) {
+      item.caseNo = caseD1Big; 
+    } else {
+      item.caseNo = caseD1;    
+    }
 
     // Cek selisih kuantitas per baris
     const totalSplit = item.splits.reduce((a, b) => a + b, 0);
@@ -156,7 +190,7 @@ function renderPOTable() {
   const tbody = document.getElementById('poTableBody');
   tbody.innerHTML = '';
   cleanedPO.forEach((item, idx) => {
-    const isB1 = item.pallet === 'B1';
+    const isB1 = (item.pallet === 'B1' || item.pallet === 'C1');
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx + 1}</td>
@@ -191,16 +225,30 @@ function buildAllData() {
   generatedASN = [];
   const rakMap = new Map();
   const hasB1 = cleanedPO.some(i => i.pallet === 'B1');
-  let currentD1Rak = hasB1 ? 1 : 0;
+  const hasC1 = cleanedPO.some(i => i.pallet === 'C1');
+
+ let currentRak = 0;
+  let rakB1 = "";
+  let rakC1 = "";
+  
+  // Tentukan nomor Rak dinamis
+  if (hasB1) {
+    currentRak++;
+    rakB1 = String(currentRak); // Biasanya jadi Rak "1"
+  }
+  if (hasC1) {
+    currentRak++;
+    rakC1 = String(currentRak); // Biasanya jadi Rak "2" kalau ada B1, jadi "1" kalau B1 kosong
+  }
 
   cleanedPO.forEach(item => {
     if (item.pallet === 'B1') {
       item.splits.forEach(qty => {
         const rowObj = {
-          NO_RAK: "1",
+          NO_RAK: rakB1,
           SHIPMENT_DATE: item.shipDate,
           CASE_NO: item.caseNo,
-          CASE_PALLETIZE_MARK: "1",
+          CASE_PALLETIZE_MARK: String(item.caseMark),
           PO_NO: item.poNo,
           PO_DATE: "",
           ITEM_NO: item.itemNo,
@@ -211,13 +259,36 @@ function buildAllData() {
           PALLET: item.pallet
         };
         generatedASN.push(rowObj);
-        if (!rakMap.has("1")) rakMap.set("1", []);
-        rakMap.get("1").push(rowObj);
+        if (!rakMap.has(rakB1)) rakMap.set(rakB1, []);
+        rakMap.get(rakB1).push(rowObj);
       });
-    } else {
+
+    } else if (item.pallet === 'C1') { // 👈 LOGIKA GABUNG C1 MASUK DI SINI
       item.splits.forEach(qty => {
-        currentD1Rak++;
-        const rakStr = String(currentD1Rak);
+        const rowObj = {
+          NO_RAK: rakC1,
+          SHIPMENT_DATE: item.shipDate,
+          CASE_NO: item.caseNo,
+          CASE_PALLETIZE_MARK: String(item.caseMark),
+          PO_NO: item.poNo,
+          PO_DATE: "",
+          ITEM_NO: item.itemNo,
+          FRANCHISE: "",
+          PART_NO: item.partNo,
+          DELIVERY_QUANTITY: qty,
+          VENDOR_CODE: item.vendor,
+          PALLET: item.pallet
+        };
+        generatedASN.push(rowObj);
+        if (!rakMap.has(rakC1)) rakMap.set(rakC1, []);
+        rakMap.get(rakC1).push(rowObj); // Semuanya disatukan ke wadah C1
+      });
+
+    } else {
+      // LOGIKA D1 & LAINNYA (Pecah Tempat per item)
+      item.splits.forEach(qty => {
+        currentRak++; // Bikin nomor Rak baru terus
+        const rakStr = String(currentRak);
         const rowObj = {
           NO_RAK: rakStr,
           SHIPMENT_DATE: item.shipDate,
@@ -250,7 +321,7 @@ function renderPartContentSlips() {
   const container = document.getElementById('partContentArea');
   container.innerHTML = '';
   groupedByRak.forEach(([rakNo, rows]) => {
-    const isMultiRow = rows.length > 1 || rows[0].PALLET === 'B1';
+    const isMultiRow = rows.length > 1 || rows[0].PALLET === 'B1' || rows[0].PALLET === 'C1';
     let rowsHtml = '';
 
     // 1 garis penanda part gabung
@@ -432,7 +503,7 @@ function downloadASNExcel() {
           ws[ref].s = {
             font: { name: "Calibri", sz: 18 },
             alignment: { horizontal: "center", vertical: "center" },
-            border: (C >= 2 && C <= 11) || row[12] === 'B1' || (C === 1 && row[1]) ? borderAll : undefined
+            border: (C >= 2 && C <= 11) || row[12] === 'B1' || row[12] === 'C1' || (C === 1 && row[1]) ? borderAll : undefined
           };
         }
       }
