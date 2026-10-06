@@ -178,7 +178,7 @@ function runValidation() {
   } else {
     const alertTop = document.getElementById('alertTopArea');
     if (alertTop) {
-      alertTop.innerHTML = '<div style="color:#dc2626; text-align:center; font-weight:bold; padding:12px; background:#fee2e2; border: 2px solid #f87171; border-radius:8px; margin-bottom: 14px;">⚠️ Case No Masih Salah! Silakan betulkan dulu cantik. 😍</div>';
+      alertTop.innerHTML = '<div class="alert-pulse" style="color:#dc2626; text-align:center; font-weight:bold; padding:12px; background:#fee2e2; border: 2px solid #f87171; border-radius:8px; margin-bottom: 14px;">⚠️ Case No Masih Salah! Silakan periksa kembali.</div>';
     }
     const partArea = document.getElementById('partContentArea');
     if (partArea) {
@@ -231,14 +231,14 @@ function buildAllData() {
   let rakB1 = "";
   let rakC1 = "";
   
-  // Tentukan nomor Rak dinamis
+ 
   if (hasB1) {
     currentRak++;
-    rakB1 = String(currentRak); // Biasanya jadi Rak "1"
+    rakB1 = String(currentRak); 
   }
   if (hasC1) {
     currentRak++;
-    rakC1 = String(currentRak); // Biasanya jadi Rak "2" kalau ada B1, jadi "1" kalau B1 kosong
+    rakC1 = String(currentRak); 
   }
 
   cleanedPO.forEach(item => {
@@ -263,7 +263,7 @@ function buildAllData() {
         rakMap.get(rakB1).push(rowObj);
       });
 
-    } else if (item.pallet === 'C1') { // 👈 LOGIKA GABUNG C1 MASUK DI SINI
+    } else if (item.pallet === 'C1') { 
       item.splits.forEach(qty => {
         const rowObj = {
           NO_RAK: rakC1,
@@ -281,7 +281,7 @@ function buildAllData() {
         };
         generatedASN.push(rowObj);
         if (!rakMap.has(rakC1)) rakMap.set(rakC1, []);
-        rakMap.get(rakC1).push(rowObj); // Semuanya disatukan ke wadah C1
+        rakMap.get(rakC1).push(rowObj); 
       });
 
     } else {
