@@ -41,7 +41,7 @@
 }
 
 .alert-pulse {
-  animation: pulseAlert 1.5s infinite; 
+  animation: pulseAlert 1s infinite; 
 }
 
     .navbar-brand {color: #f8fafc;font-family: 'Orbitron', sans-serif;font-size: 24px;font-weight: 900;letter-spacing: 3px;display: inline-flex;align-items: center;gap: 12px;text-shadow: 2px 2px 4px rgba(0,0,0,0.5);}
