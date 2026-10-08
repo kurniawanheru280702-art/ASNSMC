@@ -322,6 +322,7 @@ function renderPartContentSlips() {
   container.innerHTML = '';
   groupedByRak.forEach(([rakNo, rows]) => {
     const isMultiRow = rows.length > 1 || rows[0].PALLET === 'B1' || rows[0].PALLET === 'C1';
+     const isB1orC1 = rows[0].PALLET === 'B1' || rows[0].PALLET === 'C1';
     let rowsHtml = '';
 
     // 1 garis penanda part gabung
@@ -364,7 +365,8 @@ function renderPartContentSlips() {
     });
 
     const card = document.createElement('div');
-    card.className = 'pc-card';
+    card.className = `pc-card ${isB1orC1 ? 'break-page' : ''}`;
+    // card.className = 'pc-card';
     card.innerHTML = `
       <table class="pc-table">
         <tr>
