@@ -233,42 +233,75 @@ function updateSplit(idx, val) {
 }
 
 function buildAllData() {
+  const MAX_ISI_BOKS = 40;
   generatedASN = [];
   const rakMap = new Map();
+  const boksAktif = new Map();
   let currentRak = 0;
 
+  function tambahBaris(item, qty, rakNo) {
+    const rowObj = {
+      NO_RAK: rakNo,
+      SHIPMENT_DATE: item.shipDate,
+      CASE_NO: item.caseNo,
+      CASE_PALLETIZE_MARK: String(item.caseMark),
+      PO_NO: item.poNo,
+      PO_DATE: "",
+      ITEM_NO: item.itemNo,
+      FRANCHISE: "",
+      PART_NO: item.partNo,
+      DELIVERY_QUANTITY: qty,
+      VENDOR_CODE: item.vendor,
+      PALLET: item.pallet
+    };
+
+    generatedASN.push(rowObj);
+
+    if (!rakMap.has(rakNo)) rakMap.set(rakNo, []);
+    rakMap.get(rakNo).push(rowObj);
+  }
+
   cleanedPO.forEach(item => {
-    item.splits.forEach(qty => {
-      // Setiap pecahan qty mendapat nomor rak/boks sendiri.
-      currentRak++;
-      const rakStr = String(currentRak);
+    if (item.pallet === 'B1' || item.pallet === 'C1') {
+      // Gabungkan jika pallet, case no, dan tanggal kirim sama.
+      const key = JSON.stringify([
+        item.pallet, item.caseNo, item.shipDate
+      ]);
 
-      const rowObj = {
-        NO_RAK: rakStr,
-        SHIPMENT_DATE: item.shipDate,
-        CASE_NO: item.caseNo,
-        CASE_PALLETIZE_MARK: String(item.caseMark),
-        PO_NO: item.poNo,
-        PO_DATE: "",
-        ITEM_NO: item.itemNo,
-        FRANCHISE: "",
-        PART_NO: item.partNo,
-        DELIVERY_QUANTITY: qty,
-        VENDOR_CODE: item.vendor,
-        PALLET: item.pallet
-      };
+      let boks = boksAktif.get(key);
+      let sisa = item.orderQty;
+      item.splits = [];
 
-      generatedASN.push(rowObj);
-      rakMap.set(rakStr, [rowObj]);
-    });
+      while (sisa > 0) {
+        // Boks baru hanya jika belum ada atau sudah penuh.
+        if (!boks || boks.isi === MAX_ISI_BOKS) {
+          currentRak++;
+          boks = { rakNo: String(currentRak), isi: 0 };
+          boksAktif.set(key, boks);
+        }
+
+        const qty = Math.min(sisa, MAX_ISI_BOKS - boks.isi);
+
+        tambahBaris(item, qty, boks.rakNo);
+        item.splits.push(qty);
+
+        boks.isi += qty;
+        sisa -= qty;
+      }
+    } else {
+      item.splits.forEach(qty => {
+        currentRak++;
+        tambahBaris(item, qty, String(currentRak));
+      });
+    }
   });
 
   groupedByRak = Array.from(rakMap.entries());
+  renderPOTable();
   renderPartContentSlips();
 
   const totalQty = generatedASN.reduce(
-    (total, row) => total + row.DELIVERY_QUANTITY,
-    0
+    (total, row) => total + row.DELIVERY_QUANTITY, 0
   );
 
   const sumBar = document.getElementById('summaryBar');
