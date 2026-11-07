@@ -4,7 +4,18 @@ let generatedASN = [];
 let groupedByRak = [];
 
 function getSmartSplit(partNo, orderQty, pallet) {
-  if (pallet === 'B1'|| pallet === 'C1') return [orderQty];
+  if (pallet === 'B1' || pallet === 'C1') {
+  const splits = [];
+  let sisa = orderQty;
+
+  while (sisa > 0) {
+    const isiBoks = Math.min(sisa, 40);
+    splits.push(isiBoks);
+    sisa -= isiBoks;
+  }
+
+  return splits;
+}
   const p = String(partNo).trim();
   if (p === '48820BZ060' && orderQty === 15) return [7, 8];
   if (p === '48820BZ070' && orderQty === 21) return [10, 11];
@@ -202,7 +213,7 @@ function renderPOTable() {
       <td>${item.itemNo}</td>
       <td><b>${item.partNo}</b></td>
       <td><b>${item.orderQty}</b></td>
-      <td>${isB1 ? '🔒 Gabung 1 tempat' : 'Pecah tempat'}</td>
+      <td>${isB1 ? 'Boks maks. 40 pcs' : 'Pecah tempat'}</td>
       <td>
         <input type="text" class="split-input" value="${item.splits.join(', ')}" 
           ${isB1 ? 'readonly style="background:#fef9c3;font-weight:bold;"' : ''} 
@@ -224,99 +235,50 @@ function updateSplit(idx, val) {
 function buildAllData() {
   generatedASN = [];
   const rakMap = new Map();
-  const hasB1 = cleanedPO.some(i => i.pallet === 'B1');
-  const hasC1 = cleanedPO.some(i => i.pallet === 'C1');
-
- let currentRak = 0;
-  let rakB1 = "";
-  let rakC1 = "";
-  
- 
-  if (hasB1) {
-    currentRak++;
-    rakB1 = String(currentRak); 
-  }
-  if (hasC1) {
-    currentRak++;
-    rakC1 = String(currentRak); 
-  }
+  let currentRak = 0;
 
   cleanedPO.forEach(item => {
-    if (item.pallet === 'B1') {
-      item.splits.forEach(qty => {
-        const rowObj = {
-          NO_RAK: rakB1,
-          SHIPMENT_DATE: item.shipDate,
-          CASE_NO: item.caseNo,
-          CASE_PALLETIZE_MARK: String(item.caseMark),
-          PO_NO: item.poNo,
-          PO_DATE: "",
-          ITEM_NO: item.itemNo,
-          FRANCHISE: "",
-          PART_NO: item.partNo,
-          DELIVERY_QUANTITY: qty,
-          VENDOR_CODE: item.vendor,
-          PALLET: item.pallet
-        };
-        generatedASN.push(rowObj);
-        if (!rakMap.has(rakB1)) rakMap.set(rakB1, []);
-        rakMap.get(rakB1).push(rowObj);
-      });
+    item.splits.forEach(qty => {
+      // Setiap pecahan qty mendapat nomor rak/boks sendiri.
+      currentRak++;
+      const rakStr = String(currentRak);
 
-    } else if (item.pallet === 'C1') { 
-      item.splits.forEach(qty => {
-        const rowObj = {
-          NO_RAK: rakC1,
-          SHIPMENT_DATE: item.shipDate,
-          CASE_NO: item.caseNo,
-          CASE_PALLETIZE_MARK: String(item.caseMark),
-          PO_NO: item.poNo,
-          PO_DATE: "",
-          ITEM_NO: item.itemNo,
-          FRANCHISE: "",
-          PART_NO: item.partNo,
-          DELIVERY_QUANTITY: qty,
-          VENDOR_CODE: item.vendor,
-          PALLET: item.pallet
-        };
-        generatedASN.push(rowObj);
-        if (!rakMap.has(rakC1)) rakMap.set(rakC1, []);
-        rakMap.get(rakC1).push(rowObj); 
-      });
+      const rowObj = {
+        NO_RAK: rakStr,
+        SHIPMENT_DATE: item.shipDate,
+        CASE_NO: item.caseNo,
+        CASE_PALLETIZE_MARK: String(item.caseMark),
+        PO_NO: item.poNo,
+        PO_DATE: "",
+        ITEM_NO: item.itemNo,
+        FRANCHISE: "",
+        PART_NO: item.partNo,
+        DELIVERY_QUANTITY: qty,
+        VENDOR_CODE: item.vendor,
+        PALLET: item.pallet
+      };
 
-    } else {
-      // LOGIKA D1 & LAINNYA (Pecah Tempat per item)
-      item.splits.forEach(qty => {
-        currentRak++; // Bikin nomor Rak baru terus
-        const rakStr = String(currentRak);
-        const rowObj = {
-          NO_RAK: rakStr,
-          SHIPMENT_DATE: item.shipDate,
-          CASE_NO: item.caseNo,
-          CASE_PALLETIZE_MARK: String(item.caseMark),
-          PO_NO: item.poNo,
-          PO_DATE: "",
-          ITEM_NO: item.itemNo,
-          FRANCHISE: "",
-          PART_NO: item.partNo,
-          DELIVERY_QUANTITY: qty,
-          VENDOR_CODE: item.vendor,
-          PALLET: item.pallet
-        };
-        generatedASN.push(rowObj);
-        rakMap.set(rakStr, [rowObj]);
-      });
-    }
+      generatedASN.push(rowObj);
+      rakMap.set(rakStr, [rowObj]);
+    });
   });
 
   groupedByRak = Array.from(rakMap.entries());
   renderPartContentSlips();
 
-  const totalQty = generatedASN.reduce((acc, r) => acc + r.DELIVERY_QUANTITY, 0);
+  const totalQty = generatedASN.reduce(
+    (total, row) => total + row.DELIVERY_QUANTITY,
+    0
+  );
+
   const sumBar = document.getElementById('summaryBar');
   sumBar.style.display = 'block';
-  sumBar.innerText = `✅ Total Baris ASN: ${generatedASN.length} Baris | Total Label PART CONTENT Siap Print: ${groupedByRak.length} | Total Qty: ${totalQty} Pcs`;
+  sumBar.innerText =
+    `Total Baris ASN: ${generatedASN.length} Baris | ` +
+    `Total Label PART CONTENT Siap Print: ${groupedByRak.length} | ` +
+    `Total Qty: ${totalQty} Pcs`;
 }
+
 function renderPartContentSlips() {
   const container = document.getElementById('partContentArea');
   container.innerHTML = '';
