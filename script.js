@@ -243,8 +243,10 @@ function buildAllData() {
     const rowObj = {
       NO_RAK: rakNo,
       SHIPMENT_DATE: item.shipDate,
-      CASE_NO: item.caseNo,
-      CASE_PALLETIZE_MARK: String(item.caseMark),
+      CASE_NO: item.pallet === 'B1' && rakNo === '2'
+      ? document.getElementById('caseB1Pallet2').value.trim().toUpperCase()
+      : item.caseNo,
+      CASE_PALLETIZE_MARK: rakNo,
       PO_NO: item.poNo,
       PO_DATE: "",
       ITEM_NO: item.itemNo,
