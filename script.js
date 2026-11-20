@@ -313,6 +313,12 @@ function buildAllData() {
     `Total Label PART CONTENT Siap Print: ${groupedByRak.length} | ` +
     `Total Qty: ${totalQty} Pcs`;
 }
+function getPalletLabel(row) {
+  if (row.PALLET === 'B1' && row.NO_RAK === '2') {
+    return 'B2';
+  }
+  return row.PALLET;
+}
 
 function renderPartContentSlips() {
   const container = document.getElementById('partContentArea');
@@ -356,7 +362,7 @@ function renderPartContentSlips() {
           <td class="bordered" style="text-align:left;">${r.PART_NO}</td>
           <td class="bordered" style="text-align:right;">${r.DELIVERY_QUANTITY}</td>
           <td class="bordered" style="text-align:left;">${r.VENDOR_CODE}</td>
-          <td class="${isMultiRow ? 'bordered' : 'col-pal'}" style="text-align:left;">${r.PALLET}</td>
+          <td class="${isMultiRow ? 'bordered' : 'col-pal'}" style="text-align:left;">${getPalletLabel(r)}</td>
         </tr>
       `;
     });
@@ -406,7 +412,7 @@ function downloadASNExcel() {
     wsData.push([
       "", r.NO_RAK, r.SHIPMENT_DATE, r.CASE_NO, r.CASE_PALLETIZE_MARK,
       r.PO_NO, "", r.ITEM_NO, "", r.PART_NO, r.DELIVERY_QUANTITY,
-      r.VENDOR_CODE, r.PALLET, "", ""
+      r.VENDOR_CODE, getPalletLabel(r), "", ""
     ]);
   });
   groupedByRak.forEach(([rakNo, rows]) => {
@@ -430,7 +436,7 @@ function downloadASNExcel() {
       wsData.push([
         "", r.NO_RAK, r.SHIPMENT_DATE, r.CASE_NO, r.CASE_PALLETIZE_MARK,
         r.PO_NO, "", r.ITEM_NO, "", r.PART_NO, r.DELIVERY_QUANTITY,
-        r.VENDOR_CODE, r.PALLET
+        r.VENDOR_CODE, getPalletLabel(r)
       ]);
     });
   });
